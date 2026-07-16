@@ -1151,109 +1151,10 @@
     }
   }
 
-
-  /* Password gate */
-  body.sdr-locked{
-    overflow:hidden!important
-  }
-  body.sdr-locked > *:not(#sdrPasswordGate):not(script){
-    pointer-events:none!important;
-    user-select:none!important;
-    filter:blur(5px);
-  }
-  #sdrPasswordGate{
-    position:fixed;inset:0;z-index:5000;
-    display:flex;align-items:center;justify-content:center;
-    padding:20px;background:rgba(15,23,42,.82);
-    backdrop-filter:blur(9px)
-  }
-  #sdrPasswordGate[hidden]{
-    display:none!important
-  }
-  .sdr-password-card{
-    width:min(430px,calc(100vw - 32px));
-    background:#fff;border:2px solid #93c5fd;border-radius:22px;
-    box-shadow:0 28px 90px rgba(0,0,0,.42);
-    overflow:hidden
-  }
-  .sdr-password-head{
-    padding:22px 24px;background:#0f172a;color:#fff
-  }
-  .sdr-password-head small{
-    display:block;color:#bfdbfe;font-size:11px;font-weight:900;
-    letter-spacing:.08em;text-transform:uppercase;margin-bottom:5px
-  }
-  .sdr-password-head strong{
-    display:block;font-size:24px;line-height:1.15
-  }
-  .sdr-password-body{
-    padding:22px 24px 24px
-  }
-  .sdr-password-body label{
-    display:block;color:#334155;font-size:13px;font-weight:950;
-    margin-bottom:8px
-  }
-  #sdrPasswordInput{
-    width:100%;box-sizing:border-box;
-    border:2px solid #cbd5e1;border-radius:12px;
-    padding:13px 14px;font-size:20px;font-weight:900;
-    text-align:center;letter-spacing:.18em;
-    outline:none
-  }
-  #sdrPasswordInput:focus{
-    border-color:#60a5fa;
-    box-shadow:0 0 0 4px rgba(96,165,250,.18)
-  }
-  .sdr-password-actions{
-    display:flex;gap:10px;margin-top:14px
-  }
-  #sdrPasswordUnlock{
-    flex:1;border:0;border-radius:12px;
-    padding:12px 16px;background:#2563eb;color:#fff;
-    font-size:15px;font-weight:1000
-  }
-  #sdrPasswordUnlock:hover,
-  #sdrPasswordUnlock:focus-visible{
-    background:#1d4ed8
-  }
-  #sdrPasswordMessage{
-    min-height:20px;margin:10px 0 0;
-    color:#b91c1c;font-size:13px;font-weight:900;
-    text-align:center
-  }
-  .sdr-password-note{
-    margin:12px 0 0;color:#64748b;
-    font-size:11px;line-height:1.45;text-align:center
-  }
-
 </style>
 </head>
-<body class="sdr-locked">
+<body>
 
-<div id="sdrPasswordGate" role="dialog" aria-modal="true" aria-labelledby="sdrPasswordTitle">
-  <div class="sdr-password-card">
-    <div class="sdr-password-head">
-      <small>SDR Cycles 19–26</small>
-      <strong id="sdrPasswordTitle">Teacher Access</strong>
-    </div>
-    <div class="sdr-password-body">
-      <label for="sdrPasswordInput">Enter password to unlock</label>
-      <input id="sdrPasswordInput"
-        type="password"
-        inputmode="numeric"
-        autocomplete="off"
-        maxlength="12"
-        aria-describedby="sdrPasswordMessage">
-      <div class="sdr-password-actions">
-        <button id="sdrPasswordUnlock" type="button">Unlock</button>
-      </div>
-      <p id="sdrPasswordMessage" role="alert"></p>
-      <p class="sdr-password-note">
-        The reader, drawing tools, TTS and classroom resources remain locked until the correct password is entered.
-      </p>
-    </div>
-  </div>
-</div>
 
 <div class="app-shell">
   <section id="libraryView">
@@ -4270,58 +4171,6 @@ const BUDDY_RESOURCES = {"c19-l1":{"cycle":19,"level":1,"title":"Chocolate Milk"
   configureAuxCanvas(resourceDrawCanvas,'poster:comprehension','Comprehension Card');
 
   renderLibrary();handleRoute();applyScale();updateButtons();
-})();
-</script>
-
-<script>
-(() => {
-  const PASSWORD = '67';
-  const gate = document.getElementById('sdrPasswordGate');
-  const input = document.getElementById('sdrPasswordInput');
-  const unlockButton = document.getElementById('sdrPasswordUnlock');
-  const message = document.getElementById('sdrPasswordMessage');
-
-  function unlockReader() {
-    if (input.value.trim() !== PASSWORD) {
-      message.textContent = 'Incorrect password. Please try again.';
-      input.value = '';
-      input.focus();
-      gate.animate(
-        [
-          { transform: 'translateX(0)' },
-          { transform: 'translateX(-8px)' },
-          { transform: 'translateX(8px)' },
-          { transform: 'translateX(0)' }
-        ],
-        { duration: 220 }
-      );
-      return;
-    }
-
-    message.textContent = '';
-    document.body.classList.remove('sdr-locked');
-    gate.hidden = true;
-
-    window.dispatchEvent(new Event('resize'));
-  }
-
-  unlockButton.addEventListener('click', unlockReader);
-
-  input.addEventListener('keydown', event => {
-    if (event.key === 'Enter') {
-      event.preventDefault();
-      unlockReader();
-    }
-  });
-
-  document.addEventListener('keydown', event => {
-    if (!gate.hidden && event.key === 'Escape') {
-      event.preventDefault();
-      input.focus();
-    }
-  });
-
-  requestAnimationFrame(() => input.focus());
 })();
 </script>
 
