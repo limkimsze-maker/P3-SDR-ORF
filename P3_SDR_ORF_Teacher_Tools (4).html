@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<title>SDR Cycles 19–26 Illustrated Texts — All Pages</title>
+<title>SDR Cycles 19–26 Illustrated Texts — Teacher Tools</title>
 <style>
   :root{
     --navy:#172554; --blue:#2563eb; --blue2:#dbeafe; --ink:#0f172a;
@@ -1151,6 +1151,144 @@
     }
   }
 
+  /* Compact, always-visible teacher toolbar. A dedicated top strip keeps it
+     clear of the reading interface instead of floating over page content. */
+  :root{--teacher-toolbar-space:68px}
+  body{padding-top:var(--teacher-toolbar-space)}
+  .app-shell{min-height:calc(100vh - var(--teacher-toolbar-space))}
+  .reader{height:calc(100vh - var(--teacher-toolbar-space));height:calc(100dvh - var(--teacher-toolbar-space))}
+  .resource-modal,.buddy-modal{
+    top:var(--teacher-toolbar-space);height:calc(100vh - var(--teacher-toolbar-space));height:calc(100dvh - var(--teacher-toolbar-space))
+  }
+  #readerView.illustrated-fullscreen{padding-top:var(--teacher-toolbar-space)!important}
+
+  [data-drawing-tools-launcher]{display:none!important}
+  #teacherDrawTools.tdraw-tools,
+  #teacherDrawTools.tdraw-tools.header-open,
+  #teacherDrawTools.tdraw-tools.collapsed{
+    display:flex!important;position:fixed!important;z-index:2000!important;
+    top:8px!important;right:8px!important;left:auto!important;bottom:auto!important;
+    width:max-content!important;max-width:calc(100vw - 16px)!important;
+    height:52px!important;max-height:52px!important;margin:0!important;
+    flex-direction:row!important;align-items:center!important;
+    overflow-x:auto!important;overflow-y:hidden!important;
+    border:1px solid rgba(15,23,42,.18)!important;border-radius:11px!important;
+    background:rgba(255,255,255,.98)!important;
+    box-shadow:0 8px 24px rgba(15,23,42,.20)!important;
+    backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);
+    scrollbar-width:thin
+  }
+  #teacherDrawTools .tdraw-head{display:none!important}
+  #teacherDrawTools .tdraw-body,
+  #teacherDrawTools.collapsed .tdraw-body{
+    display:flex!important;align-items:center!important;gap:4px!important;
+    width:max-content!important;height:50px!important;max-height:50px!important;
+    padding:5px 6px!important;overflow:visible!important;background:transparent!important
+  }
+  #teacherDrawTools .tdraw-row{
+    display:flex!important;align-items:center!important;flex-wrap:nowrap!important;
+    gap:4px!important;margin:0!important;padding:0!important;width:auto!important
+  }
+  #teacherDrawTools .tdraw-row + .tdraw-row{
+    border-left:1px solid #d7dee8;padding-left:5px!important
+  }
+  #teacherDrawTools .tdraw-label,.tdraw-active-page{display:none!important}
+  #teacherDrawTools .tdraw-btn{
+    appearance:none;width:38px;height:38px;min-width:38px;padding:6px!important;
+    display:inline-flex;align-items:center;justify-content:center;
+    border:1px solid #dbe4f0;border-radius:8px;background:#f8fafc;color:#0f172a;
+    font-size:17px!important;line-height:1;font-weight:1000;box-shadow:none
+  }
+  #teacherDrawTools .tdraw-btn:hover{background:#eef2f7}
+  #teacherDrawTools .tdraw-btn.active{
+    background:#dbeafe;border-color:#2563eb;color:#1e3a8a;
+    box-shadow:inset 0 0 0 1px #2563eb
+  }
+  #teacherDrawTools .tdraw-btn.danger{background:#fff1f2;border-color:#fecdd3;color:#9f1239}
+  #teacherDrawTools #tdrawClear{position:relative;overflow:hidden}
+  #teacherDrawTools #tdrawClear::after{
+    content:"";position:absolute;left:0;bottom:0;width:0;height:4px;
+    background:#e11d48;pointer-events:none
+  }
+  #teacherDrawTools #tdrawClear.hold-active::after{
+    animation:tdraw-clear-hold 2s linear forwards
+  }
+  @keyframes tdraw-clear-hold{from{width:0}to{width:100%}}
+  #teacherDrawTools .tdraw-icon{width:23px;height:23px;display:block;pointer-events:none}
+  #teacherDrawTools .tdraw-icon *{vector-effect:non-scaling-stroke}
+  #teacherDrawTools .tdraw-select,
+  #teacherDrawTools .tdraw-text-input,
+  #teacherDrawTools .tdraw-text-size-input{
+    height:38px;border:1px solid #cbd5e1;border-radius:8px;background:#fff;color:#0f172a;
+    font:800 12px/1 Lexend,"Segoe UI",Arial,sans-serif;padding:0 8px
+  }
+  #teacherDrawTools .tdraw-select{width:70px;min-width:70px}
+  #teacherDrawTools .tdraw-text-input{width:118px;min-width:118px;cursor:text}
+  #teacherDrawTools .tdraw-font-size-wrap{
+    height:38px;display:flex;align-items:center;gap:3px;padding-left:6px;
+    border-left:1px solid #d7dee8;color:#475569;font-size:10px;font-weight:1000;
+    white-space:nowrap
+  }
+  #teacherDrawTools .tdraw-font-size-quick{
+    width:54px;height:38px;padding:0 5px;border:1px solid #cbd5e1;
+    border-radius:8px;background:#fff;color:#0f172a;font:900 12px/1 Lexend,"Segoe UI",Arial,sans-serif;
+    cursor:text
+  }
+  #teacherDrawTools .tdraw-color{
+    width:38px;height:38px;min-width:38px;padding:2px;border:1px solid #cbd5e1;
+    border-radius:8px;background:#fff
+  }
+  #teacherDrawTools .tdraw-more{position:relative;height:38px}
+  #teacherDrawTools .tdraw-more > summary{list-style:none}
+  #teacherDrawTools .tdraw-more > summary::-webkit-details-marker{display:none}
+  #teacherDrawTools .tdraw-more-panel{
+    position:fixed;top:64px;right:8px;width:min(520px,calc(100vw - 16px));
+    display:flex;flex-wrap:wrap;align-items:center;gap:7px;padding:10px;
+    background:#fff;border:1px solid #cbd5e1;border-radius:12px;
+    box-shadow:0 14px 38px rgba(15,23,42,.24)
+  }
+  #teacherDrawTools .tdraw-more:not([open]) .tdraw-more-panel{display:none}
+  #teacherDrawTools .tdraw-more-panel .tdraw-label{display:inline!important;width:auto!important}
+  #teacherDrawTools .tdraw-more-panel .tdraw-text-size-range{width:130px;min-width:100px}
+  #teacherDrawTools .tdraw-more-panel .tdraw-size-pill{display:inline-block}
+  #teacherDrawTools .tdraw-view-mode-row{position:static!important;border:0!important;background:transparent!important}
+
+  /* The Buddy Reading full-screen button follows the panel the teacher selects. */
+  .buddy-panel.selected-panel{
+    outline:4px solid rgba(37,99,235,.48);outline-offset:-4px
+  }
+  .buddy-dialog.panel-fullscreen{
+    width:100%!important;height:100%!important;max-width:none!important;max-height:none!important;
+    border-radius:0!important
+  }
+  .buddy-dialog.panel-fullscreen .buddy-content{
+    grid-template-columns:minmax(0,1fr)!important;overflow:hidden!important;
+    align-items:stretch!important;padding:8px!important
+  }
+  .buddy-dialog.panel-fullscreen .buddy-panel{display:none!important}
+  .buddy-dialog.panel-fullscreen .buddy-panel.fullscreen-target{
+    display:flex!important;width:100%!important;max-width:none!important;
+    height:100%!important;min-height:0!important;justify-self:stretch!important
+  }
+  .buddy-dialog.panel-fullscreen .buddy-panel.fullscreen-target .buddy-panel-head{
+    position:relative!important;flex:0 0 auto!important
+  }
+  .buddy-dialog.panel-fullscreen .buddy-panel.fullscreen-target .buddy-panel-body{
+    flex:1!important;min-height:0!important;overflow:hidden!important;
+    display:flex!important;align-items:center!important;justify-content:center!important;padding:8px!important
+  }
+  .buddy-dialog.panel-fullscreen .buddy-panel.fullscreen-target .annotatable-surface{
+    flex:0 0 auto!important;width:1px;height:1px;max-width:100%;max-height:100%;margin:auto
+  }
+  .buddy-dialog.panel-fullscreen .buddy-panel.fullscreen-target .buddy-panel-image{
+    width:100%!important;height:100%!important;max-width:none!important;max-height:none!important;object-fit:contain!important
+  }
+  .buddy-dialog.panel-fullscreen .buddy-scroll-cue{display:none!important}
+  @media(max-width:520px){
+    :root{--teacher-toolbar-space:64px}
+    #teacherDrawTools .tdraw-text-input{width:96px;min-width:96px}
+  }
+
 </style>
 <script src="https://cdn.counter.dev/script.js" data-id="825e93b6-ce99-40ef-8bcc-125f13297433" data-utcoffset="8"></script>
 </head>
@@ -1261,8 +1399,8 @@
             data-drawing-context="buddy">✏️ Drawing Tools</button>
           <div class="buddy-dialog-actions">
             <button id="buddyHideHeader" class="buddy-view-btn" type="button">Hide Header</button>
-            <button id="buddyFullscreenText" class="buddy-view-btn" type="button">Full-Screen Text</button>
-            <button id="buddyClose" class="buddy-close" type="button">✕ Close</button>
+            <button id="buddyFullscreenText" class="buddy-view-btn" type="button">Full Screen: Buddy Reading Text</button>
+            <button id="buddyClose" class="buddy-close" type="button" aria-label="Back to Illustrated Text">← Back to Illustrated Text</button>
           </div>
         </header>
         <button id="buddyHeaderReveal" class="view-header-reveal" type="button">Show Header</button>
@@ -1376,73 +1514,77 @@
       </section>
     </div>
 
-    <div id="teacherDrawTools" class="tdraw-tools">
+    <div id="teacherDrawTools" class="tdraw-tools header-open" role="toolbar" aria-label="Teacher drawing tools">
       <div id="teacherDrawDragHandle" class="tdraw-head">
-        <div>
-          <span class="tdraw-head-title">✏️ Teacher Drawing Tools</span>
-          <span id="tdrawActivePage" class="tdraw-active-page">Page 1</span>
-        </div>
-        <button id="tdrawCollapse" class="tdraw-collapse" type="button" aria-label="Close Drawing Tools">✕</button>
+        <span id="tdrawActivePage" class="tdraw-active-page">Page 1</span>
+        <button id="tdrawCollapse" type="button" aria-label="Keep drawing tools open">✕</button>
       </div>
       <div class="tdraw-body">
-        <div class="tdraw-row">
-          <span class="tdraw-label">Tools</span>
-          <button class="tdraw-btn active" type="button" data-tdraw-tool="pen">Pen</button>
-          <button class="tdraw-btn" type="button" data-tdraw-tool="highlighter">Highlighter</button>
-          <button class="tdraw-btn" type="button" data-tdraw-tool="eraser">Eraser</button>
-          <button class="tdraw-btn" type="button" data-tdraw-tool="boxErase">Box Erase</button>
-          <button class="tdraw-btn" type="button" data-tdraw-tool="line">Line</button>
-          <button class="tdraw-btn" type="button" data-tdraw-tool="arrow">Arrow</button>
-          <button class="tdraw-btn" type="button" data-tdraw-tool="rect">Box</button>
-          <button class="tdraw-btn" type="button" data-tdraw-tool="ellipse">Circle</button>
-          <button class="tdraw-btn" type="button" data-tdraw-tool="text">Text Box</button>
-          <button class="tdraw-btn" type="button" data-tdraw-tool="pointer">Pointer / Scroll</button>
+        <div class="tdraw-row" aria-label="Annotation tools">
+          <button class="tdraw-btn active" type="button" data-tdraw-tool="pointer" title="Pointer / scroll (default)" aria-label="Pointer and scroll">
+            <svg class="tdraw-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 3l12 10-6.2 1.1L8 20z" fill="#fff" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></svg>
+          </button>
+          <button class="tdraw-btn" type="button" data-tdraw-tool="boxErase" title="Select and erase annotations" aria-label="Select and erase annotations">
+            <svg class="tdraw-icon" viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="4" width="13" height="12" rx="1" fill="none" stroke="currentColor" stroke-width="1.6" stroke-dasharray="2.5 2"/><path d="M11 10l9 7.5-4.5.8-2 3.7z" fill="#fff" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg>
+          </button>
+          <button class="tdraw-btn" type="button" data-tdraw-tool="pen" title="Pen" aria-label="Pen">
+            <svg class="tdraw-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 18.8l1-4.2L16.8 3.8a1.8 1.8 0 012.5 0l.9.9a1.8 1.8 0 010 2.5L9.4 18z" fill="#ef4444" stroke="currentColor" stroke-width="1.4"/><path d="M5 18.8c2.2-.3 3.5-.2 5 .8-2.3.5-4.4.9-6.4.2" fill="none" stroke="#ef4444" stroke-width="1.6" stroke-linecap="round"/></svg>
+          </button>
+          <button class="tdraw-btn" type="button" data-tdraw-tool="highlighter" title="Highlighter" aria-label="Highlighter">
+            <svg class="tdraw-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 3h8v12l-2 3h-4l-2-3z" fill="#fde047" stroke="currentColor" stroke-width="1.4"/><path d="M7 21h10" stroke="#facc15" stroke-width="3" stroke-linecap="round"/></svg>
+          </button>
+          <button class="tdraw-btn" type="button" data-tdraw-tool="eraser" title="Eraser" aria-label="Eraser">
+            <svg class="tdraw-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4.5 14.5L13 6a2 2 0 012.8 0l3.2 3.2a2 2 0 010 2.8l-6.5 6.5H8.5z" fill="#f9a8d4" stroke="currentColor" stroke-width="1.4"/><path d="M12.5 18.5H21" stroke="currentColor" stroke-width="1.5"/></svg>
+          </button>
+          <button class="tdraw-btn" type="button" data-tdraw-tool="line" title="Straight line" aria-label="Straight line"><svg class="tdraw-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20L20 4" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg></button>
+          <button class="tdraw-btn" type="button" data-tdraw-tool="arrow" title="Arrow" aria-label="Arrow"><svg class="tdraw-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20L19 5M12 5h7v7" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+          <button class="tdraw-btn" type="button" data-tdraw-tool="rect" title="Box" aria-label="Box"><svg class="tdraw-icon" viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="5" width="16" height="14" rx="1" fill="none" stroke="currentColor" stroke-width="1.8"/></svg></button>
+          <button class="tdraw-btn" type="button" data-tdraw-tool="ellipse" title="Circle / oval" aria-label="Circle or oval"><svg class="tdraw-icon" viewBox="0 0 24 24" aria-hidden="true"><ellipse cx="12" cy="12" rx="8" ry="7" fill="none" stroke="currentColor" stroke-width="1.8"/></svg></button>
+          <button class="tdraw-btn" type="button" data-tdraw-tool="text" title="Text: type in the box, then click to place it" aria-label="Text tool">T</button>
         </div>
-        <div class="tdraw-row">
-          <span class="tdraw-label">Colour</span>
-          <input class="tdraw-color" id="tdrawColor" type="color" value="#ef4444" title="Choose colour">
-          <button class="tdraw-swatch active" type="button" data-tdraw-colour="#ef4444" style="background:#ef4444" aria-label="Red"></button>
-          <button class="tdraw-swatch" type="button" data-tdraw-colour="#2563eb" style="background:#2563eb" aria-label="Blue"></button>
-          <button class="tdraw-swatch" type="button" data-tdraw-colour="#16a34a" style="background:#16a34a" aria-label="Green"></button>
-          <button class="tdraw-swatch" type="button" data-tdraw-colour="#f59e0b" style="background:#f59e0b" aria-label="Amber"></button>
-          <button class="tdraw-swatch" type="button" data-tdraw-colour="#111827" style="background:#111827" aria-label="Black"></button>
-          <button class="tdraw-swatch" type="button" data-tdraw-colour="#ffffff" style="background:#ffffff" aria-label="White"></button>
+        <div class="tdraw-row" aria-label="Text setting">
+          <input class="tdraw-text-input" id="tdrawText" type="text" maxlength="80" placeholder="Type text…" title="Type text, choose T, then click to place it" aria-label="Annotation text">
+          <label class="tdraw-font-size-wrap" title="Text font size in pixels">Text
+            <input class="tdraw-font-size-quick" id="tdrawTextQuickSize" type="number" min="1" max="300" step="1" value="20" aria-label="Text font size in pixels">
+            px
+          </label>
         </div>
-        <div class="tdraw-row">
-          <span class="tdraw-label">Tip size</span>
-          <input class="tdraw-range" id="tdrawSize" type="range" min="2" max="48" step="1" value="6">
-          <span class="tdraw-size-pill" id="tdrawSizeLabel">6 px</span>
+        <div class="tdraw-row" aria-label="Ink settings">
+          <select class="tdraw-select" id="tdrawSize" title="Tip size" aria-label="Tip size">
+            <option value="2">2 px</option><option value="4">4 px</option><option value="6" selected>6 px</option><option value="8">8 px</option><option value="12">12 px</option><option value="18">18 px</option><option value="24">24 px</option><option value="36">36 px</option><option value="48">48 px</option>
+          </select>
+          <span id="tdrawSizeLabel" class="hidden">6 px</span>
+          <input class="tdraw-color" id="tdrawColor" type="color" value="#ef4444" title="Colour" aria-label="Ink colour">
         </div>
-        <div class="tdraw-row">
-          <span class="tdraw-label">Text box size</span>
-          <button class="tdraw-btn" id="tdrawTextSmaller" type="button" title="Make selected text smaller">A−</button>
-          <input class="tdraw-text-size-range" id="tdrawTextSize" type="range" min="6" max="300" step="1" value="20">
-          <button class="tdraw-btn" id="tdrawTextBigger" type="button" title="Make selected text bigger">A+</button>
-          <input class="tdraw-text-size-input" id="tdrawTextSizeNumber" type="number" min="6" max="300" step="1" value="20" aria-label="Text size in pixels">
-          <span class="tdraw-size-pill">px</span>
-          <button class="tdraw-btn" id="tdrawEditText" type="button" disabled>Edit text</button>
-          <button class="tdraw-btn" id="tdrawFitText" type="button" disabled>Fit box to text</button>
-          <button class="tdraw-btn tdraw-autofit-btn active" id="tdrawAutoHeight" type="button" disabled>Auto height: On</button>
-          <button class="tdraw-btn danger" id="tdrawDeleteText" type="button" disabled>Delete text</button>
-        </div>
-        <div class="tdraw-row">
-          <span class="tdraw-label">Actions</span>
-          <button class="tdraw-btn" id="tdrawUndo" type="button" disabled>↶ Undo</button>
-          <button class="tdraw-btn" id="tdrawRedo" type="button" disabled>↷ Redo</button>
-          <button class="tdraw-btn" id="tdrawHide" type="button">Hide ink</button>
-          <button class="tdraw-btn danger" id="tdrawClear" type="button">Clear page</button>
-        </div>
-        <div class="tdraw-row">
-          <span class="tdraw-label">Zoom</span>
-          <button class="tdraw-btn" id="tdrawZoomOut" type="button" title="Zoom out">−</button>
-          <button class="tdraw-btn" id="tdrawZoomFit" type="button" title="Fit to screen">Fit</button>
-          <button class="tdraw-btn" id="tdrawZoomIn" type="button" title="Zoom in">+</button>
-          <span class="tdraw-zoom-value" id="tdrawZoomValue">100%</span>
-        </div>
-        <div class="tdraw-row tdraw-view-mode-row">
-          <span class="tdraw-label">View mode</span>
-          <button class="tdraw-btn active" id="tdrawFitAll" type="button">Fit All</button>
-          <button class="tdraw-btn" id="tdrawScrollAll" type="button">Scroll All</button>
+        <div class="tdraw-row" aria-label="Annotation actions">
+          <button class="tdraw-btn" id="tdrawUndo" type="button" title="Undo" aria-label="Undo" disabled>↶</button>
+          <button class="tdraw-btn" id="tdrawRedo" type="button" title="Redo" aria-label="Redo" disabled>↷</button>
+          <button class="tdraw-btn" id="tdrawHide" type="button" title="Hide annotations" aria-label="Hide annotations">◉</button>
+          <button class="tdraw-btn danger" id="tdrawClearPage" type="button" title="Clear annotations on this page" aria-label="Clear annotations on this page">⌫</button>
+          <button class="tdraw-btn danger" id="tdrawClear" type="button" title="Press and hold for 2 seconds to clear all annotations everywhere" aria-label="Press and hold for 2 seconds to clear all annotations everywhere" aria-pressed="false">🗑</button>
+          <details class="tdraw-more">
+            <summary class="tdraw-btn" title="More text and view options" aria-label="More text and view options">⋯</summary>
+            <div class="tdraw-more-panel">
+              <span class="tdraw-label">Selected text</span>
+              <button class="tdraw-btn" id="tdrawTextSmaller" type="button" title="Make selected text smaller">A−</button>
+              <input class="tdraw-text-size-range" id="tdrawTextSize" type="range" min="1" max="300" step="1" value="20" aria-label="Selected text size">
+              <button class="tdraw-btn" id="tdrawTextBigger" type="button" title="Make selected text bigger">A+</button>
+              <input class="tdraw-text-size-input" id="tdrawTextSizeNumber" type="number" min="1" max="300" step="1" value="20" aria-label="Text size in pixels">
+              <button class="tdraw-btn" id="tdrawEditText" type="button" title="Edit selected text" disabled>✎</button>
+              <button class="tdraw-btn" id="tdrawFitText" type="button" title="Fit box to text" disabled>⇲</button>
+              <button class="tdraw-btn tdraw-autofit-btn active" id="tdrawAutoHeight" type="button" title="Toggle automatic text height" disabled>↕</button>
+              <button class="tdraw-btn danger" id="tdrawDeleteText" type="button" title="Delete selected text" disabled>⌫</button>
+              <span class="tdraw-label">View</span>
+              <button class="tdraw-btn" id="tdrawZoomOut" type="button" title="Zoom out">−</button>
+              <button class="tdraw-btn" id="tdrawZoomFit" type="button" title="Fit to screen">Fit</button>
+              <button class="tdraw-btn" id="tdrawZoomIn" type="button" title="Zoom in">+</button>
+              <span class="tdraw-zoom-value" id="tdrawZoomValue">100%</span>
+              <div class="tdraw-row tdraw-view-mode-row">
+                <button class="tdraw-btn active" id="tdrawFitAll" type="button" title="Fit all pages">Fit</button>
+                <button class="tdraw-btn" id="tdrawScrollAll" type="button" title="Scroll all pages">↕</button>
+              </div>
+            </div>
+          </details>
         </div>
       </div>
     </div>
@@ -1489,6 +1631,7 @@ const BUDDY_RESOURCES = {"c19-l1":{"cycle":19,"level":1,"title":"Chocolate Milk"
   const buddyShowCard=$('#buddyShowCard'),buddyFullscreenText=$('#buddyFullscreenText');
   const buddyHideHeader=$('#buddyHideHeader'),buddyHeaderReveal=$('#buddyHeaderReveal');
   const buddyReadingBody=$('#buddyReadingBody'),buddyReadingSurface=$('#buddyReadingSurface');
+  const buddyContent=$('#buddyContent');
   const buddyReadingPanel=$('#buddyReadingPanel'),buddyQuestionsPanel=$('#buddyQuestionsPanel');
   const buddyCardPanel=$('#buddyCardPanel'),buddyCardBody=$('#buddyCardBody');
   const buddyCardSurface=$('#buddyCardSurface'),buddyCardImage=$('#buddyCardImage');
@@ -1806,31 +1949,87 @@ const BUDDY_RESOURCES = {"c19-l1":{"cycle":19,"level":1,"title":"Chocolate Milk"
   let buddyReadingVisible=true;
   let buddyQuestionsVisible=true;
   let buddyCardVisible=true;
-  let buddyTextFullscreen=false;
-  let buddySavedVisibility={text:true,questions:true,card:true};
+  let buddyFullscreenPanel=null;
 
-  function fitBuddyReadingFullscreen(){
-    if(!buddyTextFullscreen||!buddyModal.classList.contains('show'))return;
-    if(!buddyReadingImage.naturalWidth||!buddyReadingImage.naturalHeight)return;
-
-    const availableWidth=Math.max(1,buddyReadingBody.clientWidth-16);
-    const scale=availableWidth/buddyReadingImage.naturalWidth;
-
-    const fittedWidth=Math.max(1,Math.floor(buddyReadingImage.naturalWidth*scale));
-    const fittedHeight=Math.max(1,Math.floor(buddyReadingImage.naturalHeight*scale));
-
-    buddyReadingSurface.style.width=fittedWidth+'px';
-    buddyReadingSurface.style.height=fittedHeight+'px';
-    resizeCanvas(buddyReadingCanvas);
-    applySurfaceView(buddyReadingCanvas);
+  function buddyPanelConfig(key){
+    if(key==='questions')return {
+      key,label:'Comprehension Questions',panel:buddyQuestionsPanel,
+      body:$('.buddy-panel-body',buddyQuestionsPanel),
+      surface:$('.annotatable-surface',buddyQuestionsPanel),
+      image:buddyQuestionsImage,canvas:buddyQuestionsCanvas
+    };
+    if(key==='card')return {
+      key,label:'Comprehension Card',panel:buddyCardPanel,
+      body:buddyCardBody,surface:buddyCardSurface,
+      image:buddyCardImage,canvas:buddyCardCanvas
+    };
+    return {
+      key:'text',label:'Buddy Reading Text',panel:buddyReadingPanel,
+      body:buddyReadingBody,surface:buddyReadingSurface,
+      image:buddyReadingImage,canvas:buddyReadingCanvas
+    };
   }
 
-  function clearBuddyReadingFullscreenFit(){
-    buddyReadingSurface.style.width='';
-    buddyReadingSurface.style.height='';
-    requestAnimationFrame(()=>{
-      resizeCanvas(buddyReadingCanvas);
-      applySurfaceView(buddyReadingCanvas);
+  function buddyPanelKeyForCanvas(canvas=activeDrawingCanvas){
+    if(canvas===buddyQuestionsCanvas)return'questions';
+    if(canvas===buddyCardCanvas)return'card';
+    if(canvas===buddyReadingCanvas)return'text';
+    return null;
+  }
+
+  function selectedBuddyPanelKey(){
+    const selected=buddyPanelKeyForCanvas();
+    if(selected==='text'&&buddyReadingVisible)return selected;
+    if(selected==='questions'&&buddyQuestionsVisible)return selected;
+    if(selected==='card'&&buddyCardVisible)return selected;
+    if(buddyReadingVisible)return'text';
+    if(buddyQuestionsVisible)return'questions';
+    return'card';
+  }
+
+  function updateBuddyFullscreenControl(){
+    const targetKey=buddyFullscreenPanel||selectedBuddyPanelKey();
+    const target=buddyPanelConfig(targetKey);
+    [buddyPanelConfig('text'),buddyPanelConfig('questions'),buddyPanelConfig('card')]
+      .forEach(config=>{
+        config.panel.classList.toggle('selected-panel',config.key===targetKey);
+        config.panel.classList.toggle('fullscreen-target',config.key===buddyFullscreenPanel);
+      });
+    buddyFullscreenText.textContent=buddyFullscreenPanel
+      ?`Exit Full Screen: ${target.label}`
+      :`Full Screen: ${target.label}`;
+    buddyFullscreenText.title=buddyFullscreenPanel
+      ?`Return to all selected panels`
+      :`Show ${target.label} full screen`;
+    buddyFullscreenText.classList.toggle('active',!!buddyFullscreenPanel);
+  }
+
+  function fitBuddySelectedFullscreen(){
+    if(!buddyFullscreenPanel||!buddyModal.classList.contains('show'))return;
+    const {body,surface,image,canvas}=buddyPanelConfig(buddyFullscreenPanel);
+    if(!image.naturalWidth||!image.naturalHeight)return;
+
+    const availableWidth=Math.max(1,body.clientWidth-16);
+    const availableHeight=Math.max(1,body.clientHeight-16);
+    const scale=Math.min(
+      availableWidth/image.naturalWidth,
+      availableHeight/image.naturalHeight
+    );
+    surface.style.width=Math.max(1,Math.floor(image.naturalWidth*scale))+'px';
+    surface.style.height=Math.max(1,Math.floor(image.naturalHeight*scale))+'px';
+    resizeCanvas(canvas);
+    applySurfaceView(canvas);
+  }
+
+  function clearBuddyFullscreenFits(){
+    ['text','questions','card'].forEach(key=>{
+      const {surface,canvas}=buddyPanelConfig(key);
+      surface.style.width='';
+      surface.style.height='';
+      requestAnimationFrame(()=>{
+        resizeCanvas(canvas);
+        applySurfaceView(canvas);
+      });
     });
   }
 
@@ -1853,15 +2052,16 @@ const BUDDY_RESOURCES = {"c19-l1":{"cycle":19,"level":1,"title":"Chocolate Milk"
   }
 
   function updateBuddyDisplayOptions(){
-    const showText=buddyTextFullscreen||buddyReadingVisible;
-    const showQuestions=!buddyTextFullscreen&&buddyQuestionsVisible;
-    const showCard=!buddyTextFullscreen&&buddyCardVisible;
+    const showText=buddyFullscreenPanel?buddyFullscreenPanel==='text':buddyReadingVisible;
+    const showQuestions=buddyFullscreenPanel?buddyFullscreenPanel==='questions':buddyQuestionsVisible;
+    const showCard=buddyFullscreenPanel?buddyFullscreenPanel==='card':buddyCardVisible;
     const visibleCount=[showText,showQuestions,showCard].filter(Boolean).length;
 
     buddyDialog.classList.toggle('text-hidden',!showText);
     buddyDialog.classList.toggle('questions-hidden',!showQuestions);
     buddyDialog.classList.toggle('card-hidden',!showCard);
-    buddyDialog.classList.toggle('text-fullscreen',buddyTextFullscreen);
+    buddyDialog.classList.remove('text-fullscreen');
+    buddyDialog.classList.toggle('panel-fullscreen',!!buddyFullscreenPanel);
     buddyDialog.classList.toggle('single-panel',visibleCount===1);
     buddyDialog.classList.toggle('two-panels',visibleCount===2);
     buddyDialog.classList.toggle('three-panels',visibleCount===3);
@@ -1870,11 +2070,11 @@ const BUDDY_RESOURCES = {"c19-l1":{"cycle":19,"level":1,"title":"Chocolate Milk"
     const cannotHideLastPanel=visibleCount===1;
 
     buddyPanelHideText.disabled=
-      buddyTextFullscreen||!showText||cannotHideLastPanel;
+      !!buddyFullscreenPanel||!showText||cannotHideLastPanel;
     buddyPanelHideQuestions.disabled=
-      buddyTextFullscreen||!showQuestions||cannotHideLastPanel;
+      !!buddyFullscreenPanel||!showQuestions||cannotHideLastPanel;
     buddyPanelHideCard.disabled=
-      buddyTextFullscreen||!showCard||cannotHideLastPanel;
+      !!buddyFullscreenPanel||!showCard||cannotHideLastPanel;
 
     buddyPanelHideText.title=cannotHideLastPanel
       ?'At least one panel must remain visible'
@@ -1886,25 +2086,24 @@ const BUDDY_RESOURCES = {"c19-l1":{"cycle":19,"level":1,"title":"Chocolate Milk"
       ?'At least one panel must remain visible'
       :'Hide Comprehension Card';
 
-    buddyRestoreTray.hidden=buddyTextFullscreen||visibleCount===3;
-    buddyShowText.hidden=showText||buddyTextFullscreen;
-    buddyShowQuestions.hidden=showQuestions||buddyTextFullscreen;
-    buddyShowCard.hidden=showCard||buddyTextFullscreen;
+    buddyRestoreTray.hidden=!!buddyFullscreenPanel||visibleCount===3;
+    buddyShowText.hidden=showText||!!buddyFullscreenPanel;
+    buddyShowQuestions.hidden=showQuestions||!!buddyFullscreenPanel;
+    buddyShowCard.hidden=showCard||!!buddyFullscreenPanel;
+    updateBuddyFullscreenControl();
 
-    buddyFullscreenText.textContent=
-      buddyTextFullscreen?'Exit Full-Screen Text':'Full-Screen Text';
-    buddyFullscreenText.classList.toggle('active',buddyTextFullscreen);
-
-    if(buddyTextFullscreen){
+    if(buddyFullscreenPanel){
       requestAnimationFrame(()=>{
-        fitBuddyReadingFullscreen();
-        buddyReadingBody.scrollTop=0;
-        setActiveDrawingCanvas(buddyReadingCanvas);
+        const target=buddyPanelConfig(buddyFullscreenPanel);
+        target.body.scrollTop=0;
+        target.body.scrollLeft=0;
+        setActiveDrawingCanvas(target.canvas);
+        fitBuddySelectedFullscreen();
       });
       return;
     }
 
-    clearBuddyReadingFullscreenFit();
+    clearBuddyFullscreenFits();
 
     requestAnimationFrame(()=>{
       if(showText){
@@ -1931,7 +2130,7 @@ const BUDDY_RESOURCES = {"c19-l1":{"cycle":19,"level":1,"title":"Chocolate Milk"
   }
 
   function hideBuddyPanel(panel){
-    if(buddyTextFullscreen||visibleBuddyPanelCount()===1)return;
+    if(buddyFullscreenPanel||visibleBuddyPanelCount()===1)return;
 
     if(panel==='text')buddyReadingVisible=false;
     if(panel==='questions')buddyQuestionsVisible=false;
@@ -1941,7 +2140,7 @@ const BUDDY_RESOURCES = {"c19-l1":{"cycle":19,"level":1,"title":"Chocolate Milk"
   }
 
   function showBuddyPanel(panel){
-    if(buddyTextFullscreen)return;
+    if(buddyFullscreenPanel)return;
 
     if(panel==='text')buddyReadingVisible=true;
     if(panel==='questions')buddyQuestionsVisible=true;
@@ -1958,44 +2157,42 @@ const BUDDY_RESOURCES = {"c19-l1":{"cycle":19,"level":1,"title":"Chocolate Milk"
   buddyShowQuestions.addEventListener('click',()=>showBuddyPanel('questions'));
   buddyShowCard.addEventListener('click',()=>showBuddyPanel('card'));
 
+  [
+    ['text',buddyReadingPanel,buddyReadingCanvas],
+    ['questions',buddyQuestionsPanel,buddyQuestionsCanvas],
+    ['card',buddyCardPanel,buddyCardCanvas]
+  ].forEach(([key,panel,canvas])=>{
+    panel.addEventListener('pointerdown',event=>{
+      if(event.target.closest('.buddy-panel-toggle'))return;
+      setActiveDrawingCanvas(canvas);
+      updateBuddyFullscreenControl();
+    });
+  });
+
   buddyFullscreenText.addEventListener('click',()=>{
-    if(!buddyTextFullscreen){
-      buddySavedVisibility={
-        text:buddyReadingVisible,
-        questions:buddyQuestionsVisible,
-        card:buddyCardVisible
-      };
-      buddyReadingVisible=true;
-      buddyQuestionsVisible=false;
-      buddyCardVisible=false;
-      buddyTextFullscreen=true;
-    }else{
-      buddyTextFullscreen=false;
-      buddyReadingVisible=buddySavedVisibility.text;
-      buddyQuestionsVisible=buddySavedVisibility.questions;
-      buddyCardVisible=buddySavedVisibility.card;
-    }
+    buddyFullscreenPanel=buddyFullscreenPanel?null:selectedBuddyPanelKey();
     updateBuddyDisplayOptions();
   });
 
-  buddyReadingImage.addEventListener('load',()=>{
-    if(buddyTextFullscreen){
-      requestAnimationFrame(()=>fitBuddyReadingFullscreen());
-    }
-  });
-
-  buddyCardImage.addEventListener('load',()=>{
+  [buddyReadingImage,buddyQuestionsImage,buddyCardImage].forEach(image=>image.addEventListener('load',()=>{
     requestAnimationFrame(()=>{
-      resizeCanvas(buddyCardCanvas);
-      applySurfaceView(buddyCardCanvas);
+      if(buddyFullscreenPanel){
+        fitBuddySelectedFullscreen();
+      }else{
+        ['text','questions','card'].forEach(key=>{
+          const config=buddyPanelConfig(key);
+          resizeCanvas(config.canvas);
+          applySurfaceView(config.canvas);
+        });
+      }
     });
-  });
+  }));
 
   const buddyFullscreenFitObserver=new ResizeObserver(()=>{
     if(!buddyModal.classList.contains('show'))return;
 
-    if(buddyTextFullscreen){
-      fitBuddyReadingFullscreen();
+    if(buddyFullscreenPanel){
+      fitBuddySelectedFullscreen();
     }else{
       if(buddyReadingVisible){
         resizeCanvas(buddyReadingCanvas);
@@ -2012,13 +2209,14 @@ const BUDDY_RESOURCES = {"c19-l1":{"cycle":19,"level":1,"title":"Chocolate Milk"
     }
   });
   buddyFullscreenFitObserver.observe(buddyReadingBody);
+  buddyFullscreenFitObserver.observe($('.buddy-panel-body',buddyQuestionsPanel));
   buddyFullscreenFitObserver.observe(buddyCardBody);
 
   window.addEventListener('resize',()=>{
     if(!buddyModal.classList.contains('show'))return;
 
-    if(buddyTextFullscreen){
-      requestAnimationFrame(()=>fitBuddyReadingFullscreen());
+    if(buddyFullscreenPanel){
+      requestAnimationFrame(()=>fitBuddySelectedFullscreen());
     }else{
       requestAnimationFrame(()=>{
         if(buddyReadingVisible){
@@ -2045,8 +2243,7 @@ const BUDDY_RESOURCES = {"c19-l1":{"cycle":19,"level":1,"title":"Chocolate Milk"
     buddyReadingVisible=true;
     buddyQuestionsVisible=true;
     buddyCardVisible=true;
-    buddyTextFullscreen=false;
-    buddySavedVisibility={text:true,questions:true,card:true};
+    buddyFullscreenPanel=null;
     buddyDialog.style.removeProperty('--buddy-preserved-width');
     setBuddyHeaderHidden(false);
     updateBuddyDisplayOptions();
@@ -2102,14 +2299,14 @@ const BUDDY_RESOURCES = {"c19-l1":{"cycle":19,"level":1,"title":"Chocolate Milk"
     buddyReadingVisible=true;
     buddyQuestionsVisible=true;
     buddyCardVisible=true;
-    buddyTextFullscreen=false;
+    buddyFullscreenPanel=null;
     buddyDialog.classList.remove(
       'questions-hidden','text-hidden','card-hidden',
-      'text-fullscreen','single-panel','two-panels','three-panels','header-hidden'
+      'text-fullscreen','panel-fullscreen','single-panel','two-panels','three-panels','header-hidden'
     );
     buddyHeaderHidden=false;
     buddyHeaderReveal.hidden=true;
-    clearBuddyReadingFullscreenFit();
+    clearBuddyFullscreenFits();
     restoreIllustratedPageCanvas();
   }
 
@@ -2126,8 +2323,8 @@ const BUDDY_RESOURCES = {"c19-l1":{"cycle":19,"level":1,"title":"Chocolate Milk"
   });
   document.addEventListener('keydown',event=>{
     if(event.key==='Escape'&&buddyModal.classList.contains('show')){
-      if(buddyTextFullscreen){
-        buddyTextFullscreen=false;
+      if(buddyFullscreenPanel){
+        buddyFullscreenPanel=null;
         updateBuddyDisplayOptions();
       }else{
         closeBuddyResources();
@@ -2315,8 +2512,8 @@ const BUDDY_RESOURCES = {"c19-l1":{"cycle":19,"level":1,"title":"Chocolate Milk"
     buddyHeaderReveal.hidden=!buddyHeaderHidden;
 
     requestAnimationFrame(()=>{
-      if(buddyTextFullscreen){
-        fitBuddyReadingFullscreen();
+      if(buddyFullscreenPanel){
+        fitBuddySelectedFullscreen();
       }else{
         if(buddyReadingVisible){
           resizeCanvas(buddyReadingCanvas);
@@ -2483,7 +2680,7 @@ const BUDDY_RESOURCES = {"c19-l1":{"cycle":19,"level":1,"title":"Chocolate Milk"
     if(illustratedTextFullscreen){
       setIllustratedTextFullscreen(false);
     }
-    currentDoc=null;document.title='SDR Cycles 19–26 Illustrated Texts — All Pages';
+    currentDoc=null;document.title='SDR Cycles 19–26 Illustrated Texts — Teacher Tools';
     document.body.classList.remove('reader-mode');
     setReaderHeaderHidden(false);
     window.scrollTo({top:0,behavior:'instant'});
@@ -2539,11 +2736,14 @@ const BUDDY_RESOURCES = {"c19-l1":{"cycle":19,"level":1,"title":"Chocolate Milk"
   const toolbar=$('#teacherDrawTools'),dragHandle=$('#teacherDrawDragHandle');
   const collapseBtn=$('#tdrawCollapse'),activePageLabel=$('#tdrawActivePage');
   const colorInput=$('#tdrawColor'),sizeInput=$('#tdrawSize'),sizeLabel=$('#tdrawSizeLabel');
-  const undoBtn=$('#tdrawUndo'),redoBtn=$('#tdrawRedo'),hideBtn=$('#tdrawHide'),clearBtn=$('#tdrawClear');
+  const textInput=$('#tdrawText');
+  const undoBtn=$('#tdrawUndo'),redoBtn=$('#tdrawRedo'),hideBtn=$('#tdrawHide');
+  const clearPageBtn=$('#tdrawClearPage'),clearBtn=$('#tdrawClear');
   const zoomOutBtn=$('#tdrawZoomOut'),zoomFitBtn=$('#tdrawZoomFit'),zoomInBtn=$('#tdrawZoomIn');
   const zoomValueLabel=$('#tdrawZoomValue');
   const fitAllBtn=$('#tdrawFitAll'),scrollAllBtn=$('#tdrawScrollAll');
   const textSizeInput=$('#tdrawTextSize'),textSizeNumber=$('#tdrawTextSizeNumber');
+  const textQuickSize=$('#tdrawTextQuickSize');
   const textSmallerBtn=$('#tdrawTextSmaller'),textBiggerBtn=$('#tdrawTextBigger');
   const editTextBtn=$('#tdrawEditText'),fitTextBtn=$('#tdrawFitText');
   const autoHeightBtn=$('#tdrawAutoHeight'),deleteTextBtn=$('#tdrawDeleteText');
@@ -2551,7 +2751,7 @@ const BUDDY_RESOURCES = {"c19-l1":{"cycle":19,"level":1,"title":"Chocolate Milk"
   let inkStore={};try{inkStore=JSON.parse(localStorage.getItem(STORAGE_KEY)||'{}')||{}}catch(e){inkStore={}}
   const redoStore={};
   const drawState={
-    hidden:false,tool:'pen',color:'#ef4444',size:6,textSize:20,
+    hidden:false,tool:'pointer',color:'#ef4444',size:6,textSize:20,
     dpr:Math.max(1,Math.min(3,window.devicePixelRatio||1))
   };
   let activeDrawingCanvas=null;
@@ -2565,7 +2765,7 @@ const BUDDY_RESOURCES = {"c19-l1":{"cycle":19,"level":1,"title":"Chocolate Milk"
   }
 
   const TOOL_CURSOR_NAMES={
-    pen:'Pen',highlighter:'Highlighter',eraser:'Eraser',boxErase:'Box Erase',
+    pen:'Pen',highlighter:'Highlighter',eraser:'Eraser',boxErase:'Select & Erase',
     line:'Line',arrow:'Arrow',rect:'Box',ellipse:'Circle',
     text:'Text Box',pointer:'Pointer'
   };
@@ -2575,7 +2775,7 @@ const BUDDY_RESOURCES = {"c19-l1":{"cycle":19,"level":1,"title":"Chocolate Milk"
       `<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32">
         <path d="M5 27L8 20 23 5c2-2 5 1 3 3L11 23z" fill="white" stroke="#111827" stroke-width="2"/>
         <path d="M8 20l3 3-6 4z" fill="#ef4444" stroke="#111827"/>
-      </svg>`,4,27,'crosshair'
+      </svg>`,5,27,'crosshair'
     ),
     highlighter:makeSvgCursor(
       `<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32">
@@ -2654,6 +2854,35 @@ const BUDDY_RESOURCES = {"c19-l1":{"cycle":19,"level":1,"title":"Chocolate Milk"
 
   function saveInk(){
     try{localStorage.setItem(STORAGE_KEY,JSON.stringify(inkStore))}catch(e){}
+  }
+
+  function clearAllAnnotationsSilently(){
+    /* Replace the complete store so unloaded pages and other texts are also
+       cleared, then remove the persisted copy used after refresh/reopening. */
+    inkStore={};
+    Object.keys(redoStore).forEach(key=>delete redoStore[key]);
+    Object.keys(selectedTextStore).forEach(key=>delete selectedTextStore[key]);
+    try{localStorage.removeItem(STORAGE_KEY)}catch(e){}
+
+    allDrawingCanvases().forEach(canvas=>{
+      const context=canvas.getContext('2d');
+      context.save();
+      context.setTransform(1,0,0,1,0,0);
+      context.clearRect(0,0,canvas.width,canvas.height);
+      context.restore();
+    });
+    redrawAll();
+  }
+
+  function clearCurrentAnnotationsSilently(){
+    const key=canvasKey();
+    if(!key||!activeDrawingCanvas)return false;
+    inkStore[key]=[];
+    delete redoStore[key];
+    delete selectedTextStore[key];
+    saveInk();
+    redrawCanvas(activeDrawingCanvas);
+    return true;
   }
 
 
@@ -2789,8 +3018,8 @@ const BUDDY_RESOURCES = {"c19-l1":{"cycle":19,"level":1,"title":"Chocolate Milk"
     });
     ctx.restore();
 
-    const padding=Math.max(16,fontPx*.55);
-    const minWidth=Math.max(100,fontPx*3.4);
+    const padding=Math.max(6,fontPx*.55);
+    const minWidth=Math.max(24,fontPx*3.4);
     const maxWidth=Math.max(minWidth,canvas.clientWidth*.52);
     const widthPx=Math.max(
       minWidth,
@@ -2804,7 +3033,7 @@ const BUDDY_RESOURCES = {"c19-l1":{"cycle":19,"level":1,"title":"Chocolate Milk"
 
     const oldBottom=(command.y||0)+(command.h||0);
     const fontPx=Math.max(
-      6,
+      1,
       Math.min(300,(command.fontN||(20/canvas.clientWidth))*canvas.clientWidth)
     );
     const fittedHeight=estimateTextBoxHeight(
@@ -2814,7 +3043,7 @@ const BUDDY_RESOURCES = {"c19-l1":{"cycle":19,"level":1,"title":"Chocolate Milk"
       fontPx
     );
 
-    command.h=Math.min(1,Math.max(.04,fittedHeight));
+    command.h=Math.min(1,Math.max(4/canvas.clientHeight,fittedHeight));
 
     if(keepBottom){
       command.y=Math.max(
@@ -2836,15 +3065,15 @@ const BUDDY_RESOURCES = {"c19-l1":{"cycle":19,"level":1,"title":"Chocolate Milk"
 
     const context=canvas.getContext('2d');
     const fontPx=Math.max(
-      6,
+      1,
       Math.min(
         300,
         (command.fontN||(20/canvas.clientWidth))*canvas.clientWidth
       )
     );
-    const padding=Math.max(10,fontPx*.28);
+    const padding=Math.max(2,fontPx*.28);
     const currentTextWidth=Math.max(
-      30,
+      4,
       (command.w||.3)*canvas.clientWidth-padding*2
     );
 
@@ -2910,17 +3139,18 @@ const BUDDY_RESOURCES = {"c19-l1":{"cycle":19,"level":1,"title":"Chocolate Milk"
     const ctx=canvas.getContext('2d');
     ctx.save();
     ctx.font=`700 ${fontPx}px "Segoe UI",Arial,sans-serif`;
-    const maxWidth=Math.max(30,widthN*canvas.clientWidth-20);
+    const padding=Math.max(2,fontPx*.35);
+    const maxWidth=Math.max(4,widthN*canvas.clientWidth-padding*2);
     const lines=wrapTextLines(ctx,text,maxWidth);
     ctx.restore();
-    const heightPx=Math.max(fontPx*1.8,lines.length*fontPx*1.28+20);
-    return Math.min(.65,Math.max(.07,heightPx/canvas.clientHeight));
+    const heightPx=Math.max(fontPx*1.4,lines.length*fontPx*1.28+padding*2);
+    return Math.min(.65,Math.max(4/canvas.clientHeight,heightPx/canvas.clientHeight));
   }
 
   function drawTextBoxCommand(ctx,canvas,command,index){
     const rect=textBoxRectPx(canvas,command);
-    const fontSize=Math.max(6,Math.min(300,(command.fontN||(20/canvas.clientWidth))*canvas.clientWidth));
-    const padding=Math.max(5,fontSize*.22);
+    const fontSize=Math.max(1,Math.min(300,(command.fontN||(20/canvas.clientWidth))*canvas.clientWidth));
+    const padding=Math.max(1,fontSize*.22);
     const lineHeight=fontSize*1.25;
 
     ctx.save();
@@ -2929,13 +3159,13 @@ const BUDDY_RESOURCES = {"c19-l1":{"cycle":19,"level":1,"title":"Chocolate Milk"
     ctx.textBaseline='top';
     ctx.font=`700 ${fontSize}px "Segoe UI",Arial,sans-serif`;
 
-    const lines=wrapTextLines(ctx,command.text||'',Math.max(20,rect.w-padding*2));
+    const lines=wrapTextLines(ctx,command.text||'',Math.max(2,rect.w-padding*2));
     let y=rect.y+padding;
 
     lines.forEach(line=>{
       if(y+lineHeight>rect.y+rect.h)return;
       const x=rect.x+padding;
-      ctx.lineWidth=Math.max(2,fontSize/10);
+      ctx.lineWidth=Math.max(.35,fontSize/10);
       ctx.strokeStyle='rgba(255,255,255,.92)';
       ctx.strokeText(line,x,y);
       ctx.fillStyle=command.color||'#ef4444';
@@ -2970,7 +3200,7 @@ const BUDDY_RESOURCES = {"c19-l1":{"cycle":19,"level":1,"title":"Chocolate Milk"
   }
 
   function setSelectedTextSize(px){
-    const size=Math.max(6,Math.min(300,Math.round(Number(px)||36)));
+    const size=Math.max(1,Math.min(300,Math.round(Number(px)||36)));
     drawState.textSize=size;
 
     const command=selectedTextCommand(activeDrawingCanvas);
@@ -2983,6 +3213,7 @@ const BUDDY_RESOURCES = {"c19-l1":{"cycle":19,"level":1,"title":"Chocolate Milk"
       redrawCanvas(activeDrawingCanvas);
     }
     updateButtons();
+    showToast(command?`Selected text: ${size} px`:`Next text: ${size} px`);
   }
 
   function editSelectedText(){
@@ -3035,8 +3266,8 @@ const BUDDY_RESOURCES = {"c19-l1":{"cycle":19,"level":1,"title":"Chocolate Milk"
       }
 
       if(buddyModal.classList.contains('show')){
-        if(buddyTextFullscreen){
-          fitBuddyReadingFullscreen();
+        if(buddyFullscreenPanel){
+          fitBuddySelectedFullscreen();
         }else{
           if(buddyReadingVisible){
             resizeCanvas(buddyReadingCanvas);
@@ -3142,6 +3373,7 @@ const BUDDY_RESOURCES = {"c19-l1":{"cycle":19,"level":1,"title":"Chocolate Milk"
       item.parentElement?.classList.toggle('drawing-target-active',item===canvas);
     });
     activePageLabel.textContent=canvas.dataset.inkLabel||'Drawing surface';
+    if(buddyModal.classList.contains('show'))updateBuddyFullscreenControl();
     if(refresh)updateButtons();
   }
 
@@ -3617,7 +3849,8 @@ const BUDDY_RESOURCES = {"c19-l1":{"cycle":19,"level":1,"title":"Chocolate Milk"
           return;
         }
 
-        const text=prompt('Type the text for the new text box:');
+        const typedText=textInput?.value?.trim()||'';
+        const text=typedText||prompt('Type the text for the new text box:');
         if(text?.trim()){
           const fontPx=drawState.textSize;
           const widthN=estimateTextBoxWidth(canvas,text.trim(),fontPx);
@@ -3634,6 +3867,7 @@ const BUDDY_RESOURCES = {"c19-l1":{"cycle":19,"level":1,"title":"Chocolate Milk"
             autoFitHeight:true
           });
           setSelectedText(canvas,commandsFor(canvas).length-1);
+          if(textInput)textInput.value='';
         }else{
           setSelectedText(canvas,-1);
         }
@@ -3695,7 +3929,7 @@ const BUDDY_RESOURCES = {"c19-l1":{"cycle":19,"level":1,"title":"Chocolate Milk"
             );
             const originalPx=(original.fontN||(20/canvas.clientWidth))*canvas.clientWidth;
             const newPx=Math.max(
-              6,
+              1,
               Math.min(300,originalPx*scale)
             );
             command.fontN=newPx/canvas.clientWidth;
@@ -3822,11 +4056,19 @@ const BUDDY_RESOURCES = {"c19-l1":{"cycle":19,"level":1,"title":"Chocolate Milk"
     undoBtn.disabled=commandsFor().length===0;
     redoBtn.disabled=redosFor().length===0;
     sizeLabel.textContent=drawState.size+' px';
-    hideBtn.textContent=drawState.hidden?'Show ink':'Hide ink';
+    hideBtn.textContent=drawState.hidden?'⊙':'◉';
+    hideBtn.title=drawState.hidden?'Show annotations':'Hide annotations';
+    hideBtn.setAttribute('aria-label',hideBtn.title);
 
     const label=activeDrawingCanvas?.dataset?.inkLabel||'Drawing surface';
     activePageLabel.textContent=label;
-    clearBtn.textContent=label.startsWith('Page ')?'Clear page':'Clear surface';
+    clearPageBtn.disabled=commandsFor().length===0;
+    clearPageBtn.textContent='⌫';
+    clearPageBtn.title=`Clear annotations on ${label}`;
+    clearPageBtn.setAttribute('aria-label',clearPageBtn.title);
+    clearBtn.textContent='🗑';
+    clearBtn.title='Press and hold for 2 seconds to clear all annotations everywhere';
+    clearBtn.setAttribute('aria-label',clearBtn.title);
     if(cursorNameLabel){
       cursorNameLabel.textContent=TOOL_CURSOR_NAMES[drawState.tool]||drawState.tool;
     }
@@ -3835,8 +4077,9 @@ const BUDDY_RESOURCES = {"c19-l1":{"cycle":19,"level":1,"title":"Chocolate Milk"
     const displayedTextSize=selectedText&&activeDrawingCanvas
       ?Math.round((selectedText.fontN||(20/activeDrawingCanvas.clientWidth))*activeDrawingCanvas.clientWidth)
       :drawState.textSize;
-    textSizeInput.value=String(Math.max(6,Math.min(300,displayedTextSize)));
-    textSizeNumber.value=String(Math.max(6,Math.min(300,displayedTextSize)));
+    textSizeInput.value=String(Math.max(1,Math.min(300,displayedTextSize)));
+    textSizeNumber.value=String(Math.max(1,Math.min(300,displayedTextSize)));
+    textQuickSize.value=String(Math.max(1,Math.min(300,displayedTextSize)));
     editTextBtn.disabled=!selectedText;
     fitTextBtn.disabled=!selectedText;
     autoHeightBtn.disabled=!selectedText;
@@ -3845,9 +4088,8 @@ const BUDDY_RESOURCES = {"c19-l1":{"cycle":19,"level":1,"title":"Chocolate Milk"
     const autoHeightOn=selectedText
       ?selectedText.autoFitHeight!==false
       :true;
-    autoHeightBtn.textContent=autoHeightOn
-      ?'Auto height: On'
-      :'Auto height: Off';
+    autoHeightBtn.textContent='↕';
+    autoHeightBtn.title=autoHeightOn?'Automatic text height: On':'Automatic text height: Off';
     autoHeightBtn.classList.toggle('active',!!selectedText&&autoHeightOn);
 
     const activeView=surfaceViewFor(activeDrawingCanvas);
@@ -3929,6 +4171,11 @@ const BUDDY_RESOURCES = {"c19-l1":{"cycle":19,"level":1,"title":"Chocolate Milk"
 
   textSizeNumber.addEventListener('change',()=>{
     setSelectedTextSize(textSizeNumber.value);
+  });
+
+  textQuickSize.addEventListener('input',()=>{
+    const value=Number(textQuickSize.value);
+    if(Number.isFinite(value)&&value>=1)setSelectedTextSize(value);
   });
 
   textSmallerBtn.addEventListener('click',()=>{
@@ -4032,43 +4279,81 @@ const BUDDY_RESOURCES = {"c19-l1":{"cycle":19,"level":1,"title":"Chocolate Milk"
     drawState.hidden=!drawState.hidden;updateButtons();
   });
 
-  clearBtn.addEventListener('click',()=>{
-    const key=canvasKey();if(!key)return;
-    const label=activeDrawingCanvas?.dataset?.inkLabel||'this surface';
-    if(!commandsFor().length||window.confirm(`Clear all annotations on ${label}?`)){
-      inkStore[key]=[];redosFor().length=0;
-      selectedTextStore[key]=-1;
-      saveInk();
-      redrawCanvas(activeDrawingCanvas);updateButtons();
-      showToast(`${label} annotations cleared`);
+  clearPageBtn.addEventListener('click',()=>{
+    const label=activeDrawingCanvas?.dataset?.inkLabel||'this page';
+    if(!commandsFor().length||window.confirm(`Clear annotations on ${label} only?`)){
+      if(clearCurrentAnnotationsSilently()){
+        updateButtons();
+        showToast(`${label} annotations cleared`);
+      }
     }
   });
+
+  let clearAllHoldTimer=null;
+  let clearAllHoldCompleted=false;
+
+  function resetClearAllHold(){
+    if(clearAllHoldTimer!==null)clearTimeout(clearAllHoldTimer);
+    clearAllHoldTimer=null;
+    clearBtn.classList.remove('hold-active');
+    clearBtn.setAttribute('aria-pressed','false');
+  }
+
+  function completeClearAllHold(){
+    clearAllHoldTimer=null;
+    clearAllHoldCompleted=true;
+    clearBtn.classList.remove('hold-active');
+    clearBtn.setAttribute('aria-pressed','false');
+    clearAllAnnotationsSilently();
+    updateButtons();
+    showToast('All annotations cleared');
+  }
+
+  function startClearAllHold(event){
+    event.preventDefault();
+    if(clearAllHoldTimer!==null)return;
+    clearAllHoldCompleted=false;
+    clearBtn.classList.remove('hold-active');
+    void clearBtn.offsetWidth;
+    clearBtn.classList.add('hold-active');
+    clearBtn.setAttribute('aria-pressed','true');
+    showToast('Keep holding for 2 seconds to clear all');
+    clearAllHoldTimer=setTimeout(completeClearAllHold,2000);
+  }
+
+  clearBtn.addEventListener('pointerdown',startClearAllHold);
+  ['pointerup','pointercancel','pointerleave'].forEach(type=>{
+    clearBtn.addEventListener(type,()=>{
+      if(!clearAllHoldCompleted)resetClearAllHold();
+    });
+  });
+  clearBtn.addEventListener('keydown',event=>{
+    if((event.key===' '||event.key==='Enter')&&!event.repeat)startClearAllHold(event);
+  });
+  clearBtn.addEventListener('keyup',event=>{
+    if(event.key===' '||event.key==='Enter'){
+      event.preventDefault();
+      if(!clearAllHoldCompleted)resetClearAllHold();
+    }
+  });
+  clearBtn.addEventListener('click',event=>{
+    event.preventDefault();
+    if(clearAllHoldCompleted){
+      clearAllHoldCompleted=false;
+      return;
+    }
+    showToast('Press and hold for 2 seconds to clear all');
+  });
+  clearBtn.addEventListener('contextmenu',event=>event.preventDefault());
 
   let drawingToolsAnchor=readerDrawingToolsButton;
 
   function positionHeaderDrawingTools(anchor=drawingToolsAnchor){
-    if(!anchor||!toolbar.classList.contains('header-open'))return;
-
-    drawingToolsAnchor=anchor;
-    const anchorRect=anchor.getBoundingClientRect();
-    const panelWidth=Math.min(540,window.innerWidth-24);
-    const left=Math.max(
-      12,
-      Math.min(window.innerWidth-panelWidth-12,anchorRect.right-panelWidth)
-    );
-    const top=Math.min(
-      window.innerHeight-72,
-      Math.max(8,anchorRect.bottom+8)
-    );
-
-    toolbar.style.setProperty('left',`${left}px`,'important');
-    toolbar.style.setProperty('top',`${top}px`,'important');
-    toolbar.style.setProperty('width',`${panelWidth}px`,'important');
-    toolbar.style.setProperty(
-      'max-height',
-      `${Math.max(180,window.innerHeight-top-12)}px`,
-      'important'
-    );
+    /* The compact toolbar owns a reserved top strip and never overlays content. */
+    toolbar.style.removeProperty('left');
+    toolbar.style.removeProperty('top');
+    toolbar.style.removeProperty('width');
+    toolbar.style.removeProperty('max-height');
   }
 
   function allDrawingToolsLaunchers(){
