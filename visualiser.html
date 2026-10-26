@@ -1,98 +1,41 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<title>SDR ORF — Classroom Visualiser Audio Fix</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SDR ORF — Classroom Visualiser Audio</title>
 <style>
-  html,body{margin:0;width:100%;height:100%;overflow:hidden;font-family:Arial,sans-serif;background:#eef3f8}
-  #reader{display:block;width:100%;height:100%;height:100dvh;border:0;background:#fff}
-  #loading{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:#eef3f8;color:#172554;z-index:9;font-size:16px;text-align:center;padding:22px}
-  #loading.hidden{display:none}
-  #error{display:none;position:fixed;top:8px;left:8px;right:8px;background:#fff7e6;border:1px solid #b45309;border-radius:10px;padding:12px;z-index:20;font-size:14px}
-  #error a{color:#1d4ed8}
+body{margin:0;background:#eef3f8;font:16px/1.5 Arial,sans-serif;color:#172554}
+main{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px}
+section{background:white;border:1px solid #dbe4f0;max-width:520px;padding:24px 32px;border-radius:18px;box-shadow:0 12px 28px #17255418}
+a{color:#2563eb}h1{font-size:21px}
 </style>
 </head>
 <body>
-<div id="loading">Opening SDR Oral Reading Fluency…</div>
-<div id="error" role="alert">The classroom audio fix could not be activated in this browser. <a href="./index.html">Open the standard ORF site</a>.</div>
-<iframe id="reader" title="SDR ORF illustrated reading classroom tool" allow="fullscreen; autoplay" allowfullscreen></iframe>
+<main id="loader"><section><h1>Preparing SDR Reading</h1><p>Loading the illustrated texts with classroom visualiser audio protection…</p><p id="message">The reading pages and teacher tools are preserved.</p></section></main>
 <script>
-(()=>{
-  'use strict';
-  const iframe=document.getElementById('reader');
-  const loading=document.getElementById('loading');
-  const error=document.getElementById('error');
-  const KEY='sdr_orf_visualiser_fix';
-  const INTRO='Get ready to listen. The reading starts now. ';
-  let enabled=true;
-  try{const v=localStorage.getItem(KEY);if(v!==null)enabled=v==='1';}catch(_){}
-
-  function setup(){
-    const win=iframe.contentWindow;
-    const doc=iframe.contentDocument;
-    if(!win||!doc||!doc.getElementById('ttsReadPage'))throw Error('ORF app not accessible');
-    const readButton=doc.getElementById('ttsReadPage');
-    const controls=doc.querySelector('.illustrated-tts-panel .tts-controls');
-    const stopButton=doc.getElementById('ttsStop');
-    const proto=win.SpeechSynthesis?.prototype;
-    if(!proto||typeof proto.speak!=='function'||!controls)throw Error('Speech API unavailable');
-
-    // Arm on Read Page, before the original app's click handler executes.
-    // Only its FIRST SpeechSynthesisUtterance gains the lead-in; existing
-    // text, follow-up phrases, pronunciation and controls remain unchanged.
-    let armed=false;
-    readButton.addEventListener('click',()=>{armed=true;},true);
-    stopButton?.addEventListener('click',()=>{armed=false;},true);
-    const nativeSpeak=proto.speak;
-    const patchedSpeak=function(utterance){
-      if(armed){
-        armed=false;
-        if(enabled&&utterance&&typeof utterance.text==='string'&&utterance.text.trim()){
-          // One uninterrupted utterance keeps the hardware's audio gate open
-          // through the introduction and into the first real reading word.
-          utterance.text=INTRO+utterance.text;
-        }
-      }
-      return nativeSpeak.call(this,utterance);
-    };
-    proto.speak=patchedSpeak;
-    if(proto.speak!==patchedSpeak)throw Error('Cannot patch speech playback');
-
-    const toggle=doc.createElement('button');
-    toggle.id='ttsVisualiserFix';
-    toggle.type='button';
-    toggle.title='Prevents a classroom visualiser from muting the opening words. Disable for Bluetooth speaker playback.';
-    toggle.style.cssText='flex:0 0 auto;white-space:nowrap;background:#1d4ed8;color:#fff;font-weight:700';
-    function refresh(){
-      toggle.textContent=enabled?'🔊 Visualiser Fix: ON':'🔊 Visualiser Fix: OFF';
-      toggle.setAttribute('aria-pressed',String(enabled));
-      toggle.style.background=enabled?'#1d4ed8':'#475569';
+(async()=>{
+  try{
+    const response=await fetch('./index.html',{cache:'default'});
+    if(!response.ok)throw new Error('Could not load the original ORF page ('+response.status+')');
+    let source=await response.text();
+    const patches=[["  let ttsQueueMode='standard';","  let ttsQueueMode='standard';\n  // Classroom visualiser audio can need a few seconds to wake after silence.\n  // The primer is separate from the reading passage and the WPM calibration.\n  let visualiserAudioMode=true;\n  try{visualiserAudioMode=localStorage.getItem('orf_visualiser_compat_v1')!=='off';}catch(_){}\n  const visualiserAudioButton=document.createElement('button');\n  visualiserAudioButton.type='button';\n  visualiserAudioButton.title='On: warm the classroom visualiser before reading. Off: immediate Bluetooth playback.';\n  function refreshVisualiserAudioButton(){\n    visualiserAudioButton.setAttribute('aria-pressed',String(visualiserAudioMode));\n    visualiserAudioButton.textContent=visualiserAudioMode?'🖥 Visualiser On':'🖥 Visualiser Off';\n    visualiserAudioButton.style.background=visualiserAudioMode?'#dcfce7':'';\n    visualiserAudioButton.style.color=visualiserAudioMode?'#166534':'';\n    visualiserAudioButton.style.fontWeight='900';\n  }\n  visualiserAudioButton.addEventListener('click',()=>{\n    visualiserAudioMode=!visualiserAudioMode;\n    try{localStorage.setItem('orf_visualiser_compat_v1',visualiserAudioMode?'on':'off');}catch(_){}\n    refreshVisualiserAudioButton();\n  });\n  refreshVisualiserAudioButton();\n  document.querySelector('.illustrated-tts-panel .tts-controls')?.append(visualiserAudioButton);\n  let visualiserPrimerTimer=null;\n  let visualiserPrimerActive=false;\n  function warmVisualiserBeforeReading(){\n    if(!visualiserAudioMode){speakNextIllustratedChunk();return;}\n    const generation=ttsGeneration;\n    const primer=new SpeechSynthesisUtterance('Ready to read. The page will begin now.');\n    primer.lang='en-GB';\n    if(ttsNarratorVoice)primer.voice=ttsNarratorVoice;\n    primer.rate=1;\n    primer.volume=1;\n    visualiserPrimerActive=true;\n    ttsReadPage.textContent='⏳ Preparing Audio';\n    ttsStatus.textContent='Warming the classroom audio system before reading.';\n    let completed=false;\n    function done(){\n      if(completed)return;\n      completed=true;\n      if(visualiserPrimerTimer){clearTimeout(visualiserPrimerTimer);visualiserPrimerTimer=null;}\n      visualiserPrimerActive=false;\n      ttsReadPage.textContent='▶ Read Page';\n      if(generation!==ttsGeneration||!ttsPlaying)return;\n      if(ttsPaused){ttsBetweenChunks=true;return;}\n      ttsPauseTimer=setTimeout(()=>{\n        ttsPauseTimer=null;\n        if(generation!==ttsGeneration||!ttsPlaying||ttsPaused)return;\n        ttsBetweenChunks=false;\n        speakNextIllustratedChunk();\n      },120);\n    }\n    primer.onend=done;\n    primer.onerror=done;\n    visualiserPrimerTimer=setTimeout(()=>{\n      if(generation!==ttsGeneration||!ttsPlaying)return;\n      try{illustratedSpeech.cancel();}catch(_){}\n      done();\n    },6500);\n    try{illustratedSpeech.speak(primer);}catch(_){done();}\n  }"],["  function stopIllustratedTts(updateMessage=true){\n    ttsGeneration+=1;","  function stopIllustratedTts(updateMessage=true){\n    ttsGeneration+=1;\n    if(visualiserPrimerTimer){clearTimeout(visualiserPrimerTimer);visualiserPrimerTimer=null;}\n    visualiserPrimerActive=false;\n    ttsReadPage.textContent='▶ Read Page';"],["    ttsPaused=false;\n    updateTtsButtons();\n    speakNextIllustratedChunk();\n  }\n\n  function pauseOrResumeIllustratedTts(){","    ttsPaused=false;\n    updateTtsButtons();\n    warmVisualiserBeforeReading();\n  }\n\n  function pauseOrResumeIllustratedTts(){"],["  function restartCurrentTtsPhraseForSpeed(){\n    if(!illustratedSpeech||!ttsPlaying||ttsPaused)return;","  function restartCurrentTtsPhraseForSpeed(){\n    if(visualiserPrimerActive)return;\n    if(!illustratedSpeech||!ttsPlaying||ttsPaused)return;"]];
+    for(let i=0;i<patches.length;i++){
+      const [before,after]=patches[i];
+      if(source.split(before).length!==2)throw new Error('Reader layout changed; audio patch '+(i+1)+' could not be applied safely');
+      source=source.replace(before,after);
     }
-    toggle.addEventListener('click',()=>{
-      enabled=!enabled;
-      armed=false;
-      try{localStorage.setItem(KEY,enabled?'1':'0');}catch(_){}
-      refresh();
-    });
-    refresh();
-    controls.appendChild(toggle);
-    loading.classList.add('hidden');
+    document.open();
+    document.write(source);
+    document.close();
+  }catch(error){
+    const msg=document.getElementById('message');
+    if(msg)msg.textContent='Audio compatibility page could not open: '+error.message;
+    const link=document.createElement('a');
+    link.href='./';
+    link.textContent='Open the original ORF page';
+    document.getElementById('loader')?.append(link);
   }
-  iframe.addEventListener('load',()=>{
-    try{setup();}
-    catch(e){
-      loading.classList.add('hidden');
-      error.style.display='block';
-    }
-  });
-  iframe.addEventListener('error',()=>{
-    loading.classList.add('hidden');
-    error.style.display='block';
-  });
-  // Keep the original ORF page, data and route intact inside the frame.
-  // Propagate any original query/hash route; visualiser.html has no own data.
-  iframe.src='./index.html'+location.search+location.hash;
 })();
 </script>
 </body>
