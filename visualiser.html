@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>SDR ORF — Classroom Visualiser Audio Fix</title>
+<style>
+  html,body{margin:0;width:100%;height:100%;overflow:hidden;font-family:Arial,sans-serif;background:#eef3f8}
+  #reader{display:block;width:100%;height:100%;height:100dvh;border:0;background:#fff}
+  #loading{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:#eef3f8;color:#172554;z-index:9;font-size:16px;text-align:center;padding:22px}
+  #loading.hidden{display:none}
+  #error{display:none;position:fixed;top:8px;left:8px;right:8px;background:#fff7e6;border:1px solid #b45309;border-radius:10px;padding:12px;z-index:20;font-size:14px}
+  #error a{color:#1d4ed8}
+</style>
+</head>
+<body>
+<div id="loading">Opening SDR Oral Reading Fluency…</div>
+<div id="error" role="alert">The classroom audio fix could not be activated in this browser. <a href="./index.html">Open the standard ORF site</a>.</div>
+<iframe id="reader" title="SDR ORF illustrated reading classroom tool" allow="fullscreen; autoplay" allowfullscreen></iframe>
+<script>
+(()=>{
+  'use strict';
+  const iframe=document.getElementById('reader');
+  const loading=document.getElementById('loading');
+  const error=document.getElementById('error');
+  const KEY='sdr_orf_visualiser_fix';
+  const INTRO='Get ready to listen. The reading starts now. ';
+  let enabled=true;
+  try{const v=localStorage.getItem(KEY);if(v!==null)enabled=v==='1';}catch(_){}
+
+  function setup(){
+    const win=iframe.contentWindow;
+    const doc=iframe.contentDocument;
+    if(!win||!doc||!doc.getElementById('ttsReadPage'))throw Error('ORF app not accessible');
+    const readButton=doc.getElementById('ttsReadPage');
+    const controls=doc.querySelector('.illustrated-tts-panel .tts-controls');
+    const stopButton=doc.getElementById('ttsStop');
+    const proto=win.SpeechSynthesis?.prototype;
+    if(!proto||typeof proto.speak!=='function'||!controls)throw Error('Speech API unavailable');
+
+    // Arm on Read Page, before the original app's click handler executes.
+    // Only its FIRST SpeechSynthesisUtterance gains the lead-in; existing
+    // text, follow-up phrases, pronunciation and controls remain unchanged.
+    let armed=false;
+    readButton.addEventListener('click',()=>{armed=true;},true);
+    stopButton?.addEventListener('click',()=>{armed=false;},true);
+    const nativeSpeak=proto.speak;
+    const patchedSpeak=function(utterance){
+      if(armed){
+        armed=false;
+        if(enabled&&utterance&&typeof utterance.text==='string'&&utterance.text.trim()){
+          // One uninterrupted utterance keeps the hardware's audio gate open
+          // through the introduction and into the first real reading word.
+          utterance.text=INTRO+utterance.text;
+        }
+      }
+      return nativeSpeak.call(this,utterance);
+    };
+    proto.speak=patchedSpeak;
+    if(proto.speak!==patchedSpeak)throw Error('Cannot patch speech playback');
+
+    const toggle=doc.createElement('button');
+    toggle.id='ttsVisualiserFix';
+    toggle.type='button';
+    toggle.title='Prevents a classroom visualiser from muting the opening words. Disable for Bluetooth speaker playback.';
+    toggle.style.cssText='flex:0 0 auto;white-space:nowrap;background:#1d4ed8;color:#fff;font-weight:700';
+    function refresh(){
+      toggle.textContent=enabled?'🔊 Visualiser Fix: ON':'🔊 Visualiser Fix: OFF';
+      toggle.setAttribute('aria-pressed',String(enabled));
+      toggle.style.background=enabled?'#1d4ed8':'#475569';
+    }
+    toggle.addEventListener('click',()=>{
+      enabled=!enabled;
+      armed=false;
+      try{localStorage.setItem(KEY,enabled?'1':'0');}catch(_){}
+      refresh();
+    });
+    refresh();
+    controls.appendChild(toggle);
+    loading.classList.add('hidden');
+  }
+  iframe.addEventListener('load',()=>{
+    try{setup();}
+    catch(e){
+      loading.classList.add('hidden');
+      error.style.display='block';
+    }
+  });
+  iframe.addEventListener('error',()=>{
+    loading.classList.add('hidden');
+    error.style.display='block';
+  });
+  // Keep the original ORF page, data and route intact inside the frame.
+  // Propagate any original query/hash route; visualiser.html has no own data.
+  iframe.src='./index.html'+location.search+location.hash;
+})();
+</script>
+</body>
+</html>
