@@ -120,8 +120,9 @@
     // Wrap only browser TTS start/cancel; do not alter text, phonics,
     // sentence chunks, read rate, voice choice or onend handlers.
     speech.speak=function(utterance){
-      if(!nextRead||!mode)return nativeSpeak(utterance);
+      const shouldWake=nextRead&&mode;
       nextRead=false;
+      if(!shouldWake)return nativeSpeak(utterance);
       resetWake();
       const req={utterance,paused:false,ready:false};
       pending=req;
