@@ -16,7 +16,7 @@ a{color:#2563eb}
 <script>
 (async()=>{
   try {
-    const response=await fetch('./index.html',{cache:'default'});
+    const response=await fetch('./original.html',{cache:'default'});
     if(!response.ok)throw new Error('Original reader could not be loaded ('+response.status+')');
     let source=await response.text();
     const patches=[["  let ttsQueueMode='standard';","\n  let ttsQueueMode='standard';\n  // Visualiser audio often sleeps after silence and loses the first few words.\n  // Use a brief spoken lead-in within the SAME utterance as the first text.\n  // Unlike a separate warm-up utterance, there is no silent handoff to gate.\n  let visualiserAudioMode=true;\n  try { visualiserAudioMode=localStorage.getItem('orf_visualiser_mode_v2')!=='off'; } catch (_) {}\n  const visualiserAudioButton=document.createElement('button');\n  visualiserAudioButton.type='button';\n  visualiserAudioButton.title='On for classroom visualiser: warm the audio before the first text word. Off for Bluetooth speaker.';\n  function refreshVisualiserAudioButton(){\n    visualiserAudioButton.setAttribute('aria-pressed',String(visualiserAudioMode));\n    visualiserAudioButton.textContent=visualiserAudioMode?'🖥 Visualiser On':'🖥 Visualiser Off';\n    visualiserAudioButton.style.background=visualiserAudioMode?'#dcfce7':'';\n    visualiserAudioButton.style.color=visualiserAudioMode?'#166534':'';\n    visualiserAudioButton.style.fontWeight='900';\n  }\n  visualiserAudioButton.addEventListener('click',()=>{\n    visualiserAudioMode=!visualiserAudioMode;\n    try { localStorage.setItem('orf_visualiser_mode_v2', visualiserAudioMode?'on':'off'); } catch (_) {}\n    refreshVisualiserAudioButton();\n  });\n  refreshVisualiserAudioButton();\n  document.querySelector('.illustrated-tts-panel .tts-controls')?.append(visualiserAudioButton);\n"],["    const utterance=new SpeechSynthesisUtterance(cleanTextForSpeech(item.text));","\n    // A speaking primer and the passage share one utterance, so the classroom\n    // audio gate has opened before the first actual word of the page.\n    // Wake the visualiser audio gate before the actual reading words.\n    // This is ONE speech utterance, avoiding a silence at hand-off.\n    const isClassroomOpening=visualiserAudioMode && ttsQueueIndex===0;\n    const classroomLeadIn=isClassroomOpening\n      ? 'Audio check. One, two, three, four. Listen carefully. Reading begins. '\n      : '';\n    const spokenText=classroomLeadIn + cleanTextForSpeech(item.text);\n    const utterance=new SpeechSynthesisUtterance(spokenText);"],["        learnVoiceNaturalWpm(item.role,item.text,baseRate,utteranceStartedAt,utteranceEndedAt);","        // Exclude audio warm-up from voice timing/calibration.\n        if(!isClassroomOpening){\n          learnVoiceNaturalWpm(item.role,item.text,baseRate,utteranceStartedAt,utteranceEndedAt);\n        }"]];
@@ -34,7 +34,7 @@ a{color:#2563eb}
     const message=document.getElementById('message');
     if(message)message.textContent='Could not activate classroom audio mode: '+String(err.message||err);
     const link=document.createElement('a');
-    link.href='./';
+    link.href='./original.html';
     link.textContent='Open standard ORF';
     document.getElementById('loader')?.append(link);
   }
