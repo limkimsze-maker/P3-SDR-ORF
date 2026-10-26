@@ -1,0 +1,170 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>P3 SDR ORF — Classroom Audio Edition</title>
+<style>
+  html,body{height:100%;margin:0;overflow:hidden;background:#eef3f8;font-family:Arial,sans-serif}
+  #originalORF{display:block;width:100%;height:100%;border:0}
+  #initialLoading{position:fixed;inset:0;z-index:100;background:#eef3f8;display:flex;align-items:center;justify-content:center;text-align:center;color:#172554;font-weight:700;padding:16px}
+  #initialLoading.hidden{display:none}
+</style>
+</head>
+<body>
+<div id="initialLoading" role="status">Opening P3 SDR ORF…</div>
+<iframe id="originalORF" title="P3 SDR ORF illustrated texts" allow="autoplay; fullscreen" allowfullscreen></iframe>
+<script>
+(() => {
+  'use strict';
+  const frame=document.getElementById('originalORF');
+  const loader=document.getElementById('initialLoading');
+  frame.src='./index.html'+location.hash;
+  let installedOn=null;
+
+  frame.addEventListener('load', () => {
+    loader.classList.add('hidden');
+    let win,doc;
+    try{win=frame.contentWindow;doc=frame.contentDocument;}catch(_){return;}
+    if(!win||!doc||!doc.getElementById('ttsReadPage'))return;
+    if(installedOn===win)return;
+    installedOn=win;
+
+    // The original reading engine and all page/content logic remain inside
+    // index.html. This edition only prepares hardware audio before Read Page.
+    const speech=win.speechSynthesis;
+    if(!speech)return;
+    const nativeSpeak=speech.speak.bind(speech);
+    const nativeCancel=speech.cancel.bind(speech);
+    const nativePause=speech.pause.bind(speech);
+    const nativeResume=speech.resume.bind(speech);
+
+    const key='sdr-orf-classroom-wakeup';
+    let mode=true;
+    try{
+      const stored=win.localStorage.getItem(key);
+      if(stored!==null)mode=stored==='1';
+    }catch(_){}
+
+    const panel=doc.querySelector('#illustratedTtsPanel .tts-controls');
+    const label=doc.createElement('label');
+    label.setAttribute('title','Enable for classroom visualisers that cut off the first words. Switch off for immediate playback through Bluetooth speakers.');
+    label.style.cssText='display:inline-flex;align-items:center;gap:6px;padding:7px 9px;border:1px solid #93c5fd;border-radius:9px;background:#eff6ff;color:#1e3a8a;font:700 12px Arial,sans-serif;cursor:pointer;user-select:none;';
+    const input=doc.createElement('input');
+    input.type='checkbox';
+    input.checked=mode;
+    input.style.cssText='width:16px;height:16px;margin:0;accent-color:#2563eb';
+    label.append(input,doc.createTextNode(' Classroom visualiser audio'));
+    panel.appendChild(label);
+
+    let nextRead=false;
+    let pending=null;
+    let startTimer=null;
+    let fadeTimer=null;
+    let osc=null,gain=null,audioContext=null;
+
+    function stopTone(){
+      if(fadeTimer!==null){clearTimeout(fadeTimer);fadeTimer=null;}
+      if(osc){try{osc.stop();}catch(_){}try{osc.disconnect();}catch(_){}osc=null;}
+      if(gain){try{gain.disconnect();}catch(_){}gain=null;}
+    }
+    function resetWake(){
+      if(startTimer!==null){clearTimeout(startTimer);startTimer=null;}
+      pending=null;
+      stopTone();
+    }
+    function primeHardware(){
+      try{
+        const AudioContextCtor=win.AudioContext||win.webkitAudioContext;
+        if(!AudioContextCtor)return;
+        if(!audioContext||audioContext.state==='closed')audioContext=new AudioContextCtor();
+        osc=audioContext.createOscillator();
+        gain=audioContext.createGain();
+        const now=audioContext.currentTime;
+        osc.type='sine';
+        osc.frequency.value=380;
+        gain.gain.setValueAtTime(0.001,now);
+        gain.gain.linearRampToValueAtTime(0.05,now+0.08);
+        gain.gain.setValueAtTime(0.05,now+0.99);
+        gain.gain.linearRampToValueAtTime(0.008,now+1.22);
+        osc.connect(gain);
+        gain.connect(audioContext.destination);
+        osc.start();
+        audioContext.resume().catch(()=>{});
+      }catch(_){stopTone();}
+    }
+    function beginSpeech(req){
+      if(pending!==req||req.paused)return;
+      pending=null;
+      try{nativeSpeak(req.utterance);}catch(_){}
+      // Give slow HDMI/visualiser audio output time to remain awake as the
+      // actual narration begins, then stop the very soft primer.
+      fadeTimer=setTimeout(()=>{fadeTimer=null;stopTone();},800);
+    }
+
+    input.addEventListener('change',()=>{
+      mode=input.checked;
+      try{win.localStorage.setItem(key,mode?'1':'0');}catch(_){}
+      if(!mode&&pending){
+        const req=pending;
+        if(startTimer!==null){clearTimeout(startTimer);startTimer=null;}
+        stopTone();
+        beginSpeech(req);
+      }
+    });
+
+    doc.addEventListener('click',event=>{
+      if(event.target.closest('#ttsReadPage'))nextRead=true;
+    },true);
+
+    // Wrap only browser TTS start/cancel; do not alter text, phonics,
+    // sentence chunks, read rate, voice choice or onend handlers.
+    speech.speak=function(utterance){
+      if(!nextRead||!mode)return nativeSpeak(utterance);
+      nextRead=false;
+      resetWake();
+      const req={utterance,paused:false,ready:false};
+      pending=req;
+      const status=doc.getElementById('ttsStatus');
+      if(status)status.textContent='Preparing classroom audio so the first words are heard…';
+      primeHardware();
+      startTimer=setTimeout(()=>{
+        startTimer=null;
+        if(pending!==req)return;
+        req.ready=true;
+        beginSpeech(req);
+      },1400);
+    };
+    speech.cancel=function(){
+      resetWake();
+      return nativeCancel();
+    };
+    speech.pause=function(){
+      if(pending)pending.paused=true;
+      return nativePause();
+    };
+    speech.resume=function(){
+      const req=pending;
+      if(req)req.paused=false;
+      const result=nativeResume();
+      if(req&&req.ready)beginSpeech(req);
+      return result;
+    };
+
+    // Maintain deep links to pages and documents on the classroom URL.
+    const syncOuterHash=()=>{
+      if(location.hash!==win.location.hash){
+        history.replaceState(null,'',location.pathname+location.search+win.location.hash);
+      }
+    };
+    win.addEventListener('hashchange',syncOuterHash);
+    syncOuterHash();
+  });
+  window.addEventListener('hashchange',()=>{
+    const win=frame.contentWindow;
+    try{if(win&&win.location.hash!==location.hash)win.location.hash=location.hash;}catch(_){}
+  });
+})();
+</script>
+</body>
+</html>
